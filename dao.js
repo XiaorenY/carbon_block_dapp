@@ -9,8 +9,56 @@ function change_page(){
   window.location.href = "index.html";
 } 
 
+function make_proposal(){
+  window.location.href = "proposal.html";
+} 
 
+onLoad();
 
+async function onLoad() {  
+  let user = Moralis.User.current();
+  if (!user) {
+    user = await Moralis.authenticate();
+  }
+  
+  document.getElementById('btn-login').innerHTML = user.get('ethAddress');
+  
+  query = parseQuery(window.location.search);
+
+  document.getElementById('new-project-price').innerHTML = "Proposed project has initial list price " + query.price;
+  document.getElementById('new-project-fraction').innerHTML =  "Total supply of fraction token " + query.fraction;
+
+}
+
+function parseQuery(query) {
+
+  object = {};
+        
+  if (query.indexOf('?') != -1){
+
+    query = query.split('?');		
+    query = query[1];
+
+  }
+
+  parseQuery = query.split("&");
+
+  for (var i = 0; i < parseQuery.length; i++) {
+
+      pair = parseQuery[i].split('=');
+      key = decodeURIComponent(pair[0]);
+      if (key.length == 0) continue;
+      value = decodeURIComponent(pair[1].replace("+"," "));
+
+      if (object[key] == undefined) object[key] = value;
+      else if (object[key] instanceof Array) object[key].push(value);
+      else object[key] = [object[key],value];
+
+  }
+
+  return object;
+
+};
 
 // LOG IN WITH METAMASK
 async function login() {
@@ -68,32 +116,3 @@ function voteNo() {
   console.log("You vote no");
 }
 
-async function balanceOf() {
-  const user = Moralis.User.current();
-  console.log(user);
-
-  const contractAddress = '0x27F3e1100023C699C3E6031D112a1f07782B7068';
-  const abiJson = await fetch('./NFT.json').then(response => {
-    return response.json();
-  });
-  
-  const contractAbi = abiJson['abi'];
-  console.log(contractAbi);
-
-  const readOptions = {
-    contractAddress: contractAddress,
-    functionName: "balanceOf",
-    abi: contractAbi,
-    params: { owner: user.get('ethAddress') },
-  };
-  await Moralis.enableWeb3();
-  console.log('ENABLEd', Moralis.isWeb3Enabled());
-
-  const result = await Moralis.executeFunction(readOptions);
-  console.log(result);
-  await Moralis.deactivateWeb3();
-  console.log('DISABLED', Moralis.isWeb3Enabled());
-
-  document.getElementById('balanceof').innerHTML = result;
-
-}

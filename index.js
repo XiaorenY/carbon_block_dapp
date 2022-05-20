@@ -1,6 +1,6 @@
 
 function change_page(){
-  window.location.href = "dao.html";
+  window.location.href = "proposal.html";
 } 
 
 // bind button click handlers
